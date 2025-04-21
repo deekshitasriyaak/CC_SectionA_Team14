@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h2 {
+            color: #333;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .section {
+            display: none;
+            margin-top: 20px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #f2f2f2;
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .flash-message, .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .alert-info {
+            background-color: #d9edf7;
+            border: 1px solid #bce8f1;
+            color: #31708f;
+        }
+        .alert-success {
+            background-color: #dff0d8;
+            border: 1px solid #d6e9c6;
+            color: #3c763d;
+        }
+        .flash-message {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+
+{% for message in get_flashed_messages() %}
+  <div class="flash-message">
+    {{ message }}
+  </div>
+{% endfor %}
+
+<h2>Admin Dashboard</h2>
+<a href="/auth/logout">Logout</a>
+
+<div>
+    <button onclick="showSection('students')">View Students</button>
+    <button onclick="showSection('teachers')">View Teachers</button>
+    <button onclick="showSection('subjects')">View Subjects</button>
+    <a href="{{ url_for('feedback_service.admin_view_feedback') }}">
+        <button class="feedback-button">View Feedback</button>
+    </a>
+    <button onclick="showSection('faculty')">View Accepted Faculty</button>
+
+
+</div>
+
+
+
+<div id="students" class="section">
+    <h3>Students</h3>
+    <ul>
+        {% for student in students %}
+            <li>{{ student.student_name }} - Year: {{ student.student_year }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div id="teachers" class="section">
+    <h3>Teachers</h3>
+    <ul>
+        {% for teacher in teachers %}
+            <li>{{ teacher.teacher_name }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div id="subjects" class="section">
+    <h3>Subjects</h3>
+    <ul>
+        {% for subject in subjects %}
+            <li>{{ subject.subject_name }} - Year: {{ subject.subject_year }} (Teacher ID: {{ subject.teacher_id }})</li>
+        {% endfor %}
+    </ul>
+</div>
+<div id="faculty" class="section">
+    <h3>Accepted Faculty</h3>
+    <ul>
+        {% for fac in faculty %}
+            <li>
+                {{ fac.name }} - {{ fac.email }} 
+                <a href="{{ url_for('dashboard_service.view_faculty_details', id=fac.id) }}">
+                    <button>View Details</button>
+                </a>
+            </li>
+        {% else %}
+            <li>No accepted faculty available.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<h3>Notice Board</h3>
+<a href="{{ url_for('notice_service.add_notice') }}">
+    <button>Add Notice</button>
+</a>
+
+<h3>Timetables</h3>
+{% for year, timetable in timetables_by_year.items() %}
+    <h4>Year {{ year }}</h4>
+    <table>
+        <tr>
+            <th>Day/Period</th>
+            {% for period in range(1, 7) %}
+                <th>Period {{ period }}</th>
+            {% endfor %}
+        </tr>
+        {% for day_index in range(6) %}
+            <tr>
+                <td>Day {{ day_index + 1 }}</td>
+                {% for period_index in range(6) %}
+                    <td>
+                        {% set slot = timetable[day_index][period_index] %}
+                        {% if slot %}
+                            Subject: {{ slot["subject"] }}<br>
+                            Teacher: {{ slot["teacher"] }}
+                        {% else %}
+                            Free
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+{% endfor %}
+
+<h3>Generate Timetable</h3>
+<form action="{{ url_for('timetable_service.generate_timetable_route') }}" method="POST">
+    <button type="submit">Generate Timetable for All Years</button>
+</form>
+
+<script>
+    function showSection(sectionId) {
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(section => {
+            section.style.display = 'none';
+        });
+        document.getElementById(sectionId).style.display = 'block';
+    }
+</script>
+
+</body>
+</html>

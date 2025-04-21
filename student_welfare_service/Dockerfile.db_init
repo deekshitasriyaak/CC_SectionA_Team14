@@ -1,0 +1,12 @@
+# File: Dockerfile.db_init
+
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY init_student_db.sql .
+COPY db_init.py .
+
+RUN pip install --no-cache-dir sqlite3 2>/dev/null || echo "sqlite3 already included"
+
+CMD ["python", "db_init.py"]

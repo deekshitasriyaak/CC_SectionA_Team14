@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Details</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</head>
+<body>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Faculty Details</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h3>{{ faculty.name }}</h3>
+                        <span class="badge badge-primary">{{ faculty.subject }}</span>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-md-4 font-weight-bold">Email:</div>
+                        <div class="col-md-8">{{ faculty.email }}</div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-md-4 font-weight-bold">Phone:</div>
+                        <div class="col-md-8">{{ faculty.phone }}</div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-md-4 font-weight-bold">Experience:</div>
+                        <div class="col-md-8">{{ faculty.experience }} years</div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-md-4 font-weight-bold">Skills:</div>
+                        <div class="col-md-8">{{ faculty.skills }}</div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-md-4 font-weight-bold">Interview Date:</div>
+                        <div class="col-md-8">{{ faculty.interview_date }}</div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-md-4 font-weight-bold">Imported On:</div>
+                        <div class="col-md-8">{{ faculty.imported_on }}</div>
+                    </div>
+                    
+                    {% if faculty.resume_path %}
+                    <div class="row mb-2">
+                        <div class="col-md-4 font-weight-bold">Resume:</div>
+                        <div class="col-md-8">
+                            <a href="{{ url_for('dashboard_service.download_faculty_resume', filename=faculty.resume_path | file_basename) }}">Download Resume</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('dashboard_service.admin_dashboard') }}" class="btn btn-secondary">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

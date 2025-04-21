@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Feedback Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h2, h3 {
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .back-button {
+            background-color: #607D8B;
+        }
+        .feedback-list {
+            margin-top: 20px;
+        }
+        .feedback-item {
+            background-color: #f9f9f9;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #2196F3;
+        }
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .feedback-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .status-pending {
+            background-color: #ffeb3b;
+            color: #333;
+        }
+        .status-reviewed {
+            background-color: #2196F3;
+            color: white;
+        }
+        .status-resolved {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .feedback-content {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .user-info {
+            color: #555;
+            font-size: 14px;
+        }
+        .user-type {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .user-Student {
+            background-color: #9C27B0;
+            color: white;
+        }
+        .user-Teacher {
+            background-color: #FF9800;
+            color: white;
+        }
+        .feedback-date {
+            color: #777;
+            font-size: 12px;
+        }
+        .response-form {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+        .admin-response {
+            background-color: #e3f2fd;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+        .filter-options {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+        }
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .flash-success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Feedback Management</h2>
+        <a href="{{ url_for('dashboard_service.admin_dashboard') }}"><button class="back-button">Back to Dashboard</button></a>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="filter-options">
+            <h3>Filter Options</h3>
+            <button onclick="filterFeedback('all')">All Feedback</button>
+            <button onclick="filterFeedback('pending')">Pending</button>
+            <button onclick="filterFeedback('reviewed')">Reviewed</button>
+            <button onclick="filterFeedback('resolved')">Resolved</button>
+            <button onclick="filterFeedback('student')">Students Only</button>
+            <button onclick="filterFeedback('teacher')">Teachers Only</button>
+        </div>
+        
+        <div class="feedback-list">
+            {% if all_feedback %}
+                {% for feedback, user_name, user_role in all_feedback %}
+                    <div class="feedback-item" 
+                         data-status="{{ feedback.status.lower() }}"
+                         data-role="{{ user_role.lower() }}">
+                        <div class="feedback-header">
+                            <div>
+                                <span class="user-info">From: <strong>{{ user_name }}</strong></span>
+                                <span class="user-type user-{{ user_role }}">{{ user_role }}</span>
+                                <span class="feedback-date"> - {{ feedback.feedback_date.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </div>
+                            <span class="feedback-status status-{{ feedback.status.lower() }}">{{ feedback.status }}</span>
+                        </div>
+                        
+                        <div class="feedback-content">
+                            <p><strong>Feedback:</strong></p>
+                            <p>{{ feedback.feedback_text }}</p>
+                        </div>
+                        
+                        {% if feedback.admin_response %}
+                            <div class="admin-response">
+                                <p><strong>Your Response:</strong></p>
+                                <p>{{ feedback.admin_response }}</p>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="response-form">
+                            <form method="POST" action="{{ url_for('feedback_service.admin_respond_feedback', feedback_id=feedback.feedback_id) }}">
+                                <label for="admin_response"><strong>Respond to this feedback:</strong></label><br>
+                                <textarea id="admin_response" name="admin_response" placeholder="Type your response here...">{{ feedback.admin_response or '' }}</textarea><br>
+                                
+                                <label for="status"><strong>Update Status:</strong></label>
+                                <select name="status" id="status">
+                                    <option value="Pending" {% if feedback.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="Reviewed" {% if feedback.status == 'Reviewed' %}selected{% endif %}>Reviewed</option>
+                                    <option value="Resolved" {% if feedback.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                                </select>
+                                
+                                <button type="submit">Submit Response</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No feedback has been submitted yet.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        function filterFeedback(filterType) {
+            const feedbackItems = document.querySelectorAll('.feedback-item');
+            
+            feedbackItems.forEach(item => {
+                const status = item.getAttribute('data-status');
+                const role = item.getAttribute('data-role');
+                
+                if (filterType === 'all' || 
+                    (filterType === status) || 
+                    (filterType === role)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+services:
+  job_db:
+    image: mysql:5.7
+    platform: linux/amd64
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "chandu@123S"
+      MYSQL_DATABASE: job_portal
+    ports:
+      - "3308:3306"
+    networks:
+      - backend
+    hostname: job_db  # Important!
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pchandu@123S"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  faculty-recruitment:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    networks:
+      - recruitment-network
+
+networks:
+  recruitment-network:
+    driver: bridge
+
+volumes:
+  db_data:  # Named volume to persist DB data

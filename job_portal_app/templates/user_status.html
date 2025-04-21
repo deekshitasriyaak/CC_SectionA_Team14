@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Application Status</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>📋 Application Status</h2>
+
+        {% if name %}
+            <p><strong>Name:</strong> {{ name }}</p>
+            <p><strong>Status:</strong> 
+                {% if status == 'Accepted' %}
+                    <span style="color: green;">✅ Accepted</span>
+                {% elif status == 'Rejected' %}
+                    <span style="color: red;">❌ Rejected-Thank you for applying. While this role wasn't a match, we hope you'll consider future openings with us.</span>
+                {% elif status == 'Shortlisted' %}
+                    <span style="color: orange;">🟠 Shortlisted</span>
+                {% else %}
+                    <span style="color: gray;">🕒 Pending</span>
+                {% endif %}
+            </p>
+
+            {% if interview %}
+                <h4>📅 Interview Details</h4>
+                <p><strong>Date:</strong> 
+                    {% if interview[2] %}
+                        {{ interview[2].strftime('%d %B %Y, %I:%M %p') }}
+                    {% else %}
+                        Not scheduled yet
+                    {% endif %}
+                </p>
+                <p><strong>Panel:</strong> {{ interview[3] or "Not Assigned" }}</p>
+                <p><strong>Link:</strong> 
+                    {% if interview[5] %}
+                        <a href="{{ interview[5] }}" target="_blank">{{ interview[5] }}</a>
+                    {% else %}
+                        Not Provided
+                    {% endif %}
+                </p>
+                <p><strong>Message:</strong> {{ interview[6] or "No message provided" }}</p>
+            {% endif %}
+        {% else %}
+            <p>No application found with the given email.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

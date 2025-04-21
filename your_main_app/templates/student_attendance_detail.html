@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Attendance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h2 {
+            color: #333;
+        }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+            text-align: center;
+        }
+        table {
+            margin-top: 20px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h2>View Attendance</h2>
+    <p>Welcome, {{ student.student_name }}</p>
+    <p>Subject: {{ subject.subject_name }}</p>
+    <a href="/dashboard/student">Back to Dashboard</a>
+
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Status</th>
+        </tr>
+        {% for record in attendance_records %}
+            <tr>
+                <td>{{ record.date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ record.status }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Notice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h2 {
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2>Add Notice</h2>
+    <a href="/dashboard/admin">Back to Dashboard</a>
+
+    <form method="POST">
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" placeholder="Enter notice title..." required><br>
+        <label for="content">Content:</label><br>
+        <textarea id="content" name="content" placeholder="Enter notice content..." required></textarea><br>
+        <button type="submit">Submit Notice</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block title %}Accepted Faculty{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Accepted Faculty</h2>
+    <p class="text-muted">These are candidates who have been accepted through the job portal system.</p>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Faculty List</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Subject</th>
+                            <th>Experience</th>
+                            <th>Interview Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for person in faculty %}
+                        <tr>
+                            <td>{{ person.name }}</td>
+                            <td>{{ person.email }}</td>
+                            <td>{{ person.subject }}</td>
+                            <td>{{ person.experience }} years</td>
+                            <td>{{ person.interview_date }}</td>
+                            <td>
+                                <a href="{{ url_for('view_faculty_details', id=person.id) }}" class="btn btn-sm btn-info">Details</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">No accepted faculty found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

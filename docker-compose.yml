@@ -1,0 +1,161 @@
+version: '3.8'
+
+services:
+  # MySQL database for student welfare service
+  student_db:
+    image: mysql:5.7
+    platform: linux/amd64
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Domaaru07,
+      MYSQL_DATABASE: student_welfare
+    volumes:
+      - student_db_data:/var/lib/mysql
+      - ./student_welfare_service/init_student_db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pDomaaru07,"]  # Password with comma enclosed in quotes
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Other services...
+
+
+  student_app:
+    build: ./student_welfare_service
+    platform: linux/amd64
+    ports:
+      - "5001:5000"
+    depends_on:
+      student_db:
+        condition: service_healthy
+    networks:
+      - backend
+    environment:
+      - MYSQL_HOST=student_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=Domaaru07,
+      - MYSQL_DB=student_welfare
+    restart: on-failure
+
+  job_portal_app:
+    build: ./job_portal_app
+    platform: linux/amd64
+    ports:
+      - "5002:5000"
+    depends_on:
+      job_db:
+        condition: service_healthy
+      job_db_init:
+        condition: service_completed_successfully
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - backend
+    environment:
+      - JOB_DB_HOST=job_db
+      - JOB_DB_USER=root
+      - JOB_DB_PASSWORD=chandu@123S
+      - JOB_DB_NAME=job_portal
+
+      # School DB details to allow insert
+      - SCHOOL_DB_HOST=school
+      - SCHOOL_DB_USER=root
+      - SCHOOL_DB_PASSWORD=password
+      - SCHOOL_DB_NAME=school
+
+
+  main_app:
+    build: ./your_main_app
+    platform: linux/amd64
+    ports:
+      - "5003:5000"
+    depends_on:
+      school:
+        condition: service_healthy
+      db_init:
+        condition: service_completed_successfully
+    networks:
+      - backend
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@school:3306/school
+    restart: on-failure
+    volumes:
+      - ./uploads:/app/uploads
+  
+  db_init:
+    build: 
+      context: ./your_main_app
+      dockerfile: Dockerfile.db_init
+    depends_on:
+      school:
+        condition: service_healthy
+    networks:
+      - backend
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@school:3306/school
+    restart: "no" 
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "school_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  job_db:
+    image: mysql:5.7
+    platform: linux/amd64
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: chandu@123S
+      MYSQL_DATABASE: job_portal
+    ports:
+      - "3308:3306"
+    networks:
+      - backend
+    hostname: db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pchandu@123S"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  school:
+    image: mysql:5.7
+    platform: linux/amd64
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: school
+    ports:
+      - "3309:3306"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-ppassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+
+  job_db_init:
+    build:
+      context: ./job_portal_app
+      dockerfile: Dockerfile.db_init
+    depends_on:
+      job_db:
+        condition: service_healthy
+    networks:
+      - backend
+    environment:
+      - JOB_DB_HOST=job_db
+      - JOB_DB_USER=root
+      - JOB_DB_PASSWORD=chandu@123S
+      - JOB_DB_NAME=job_portal
+    restart: "no"
+
+volumes:
+  student_db_data:
+networks:
+  backend:

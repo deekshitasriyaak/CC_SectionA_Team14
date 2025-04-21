@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h2 {
+            color: #333;
+        }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+            text-align: center;
+        }
+        table {
+            margin-top: 20px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .feedback-button {
+            background-color: #2196F3;
+            margin-top: 20px;
+            display: inline-block;
+        }
+        .flash-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .flash-success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .flash-error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <h2>Student Dashboard</h2>
+    <p>Welcome, {{ student.student_name }} (Year {{ student.student_year }})</p>
+    <a href="/auth/logout">Logout</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h3>Your Subjects</h3>
+    <table>
+        <tr>
+            <th>Subject Name</th>
+            <th>Classes Present / Total Marked Classes</th>
+            <th>Action</th>
+        </tr>
+        {% for summary in attendance_summary %}
+            <tr>
+                <td>{{ summary.subject_name }}</td>
+                <td>{{ summary.present_classes }} / {{ summary.total_marked_classes }}</td>
+                <td>
+                    <a href="{{ url_for('attendance_service.student_view_attendance', subject_name=summary.subject_name) }}">
+                        <button>View Attendance</button>
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h3>Your Timetable</h3>
+    <table>
+        <tr>
+            <th>Day/Period</th>
+            {% for period in range(1, 7) %}
+                <th>Period {{ period }}</th>
+            {% endfor %}
+        </tr>
+        {% for day_index in range(6) %}
+            <tr>
+                <td>Day {{ day_index + 1 }}</td>
+                {% for period_index in range(6) %}
+                    <td>
+                        {% set slot = timetable[day_index][period_index] %}
+                        {% if slot %}
+                            Subject: {{ slot["subject"] }}<br>
+                            Teacher: {{ slot["teacher"] }}
+                        {% else %}
+                            Free
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    <h3>Notice Board</h3>
+        <a href="{{ url_for('notice_service.view_notices') }}">
+            <button>View Notices</button>
+        </a>
+    <div>
+        <a href="{{ url_for('feedback_service.submit_feedback') }}">
+            <button class="feedback-button">Submit Feedback</button>
+        </a>
+    </div>
+</body>
+</html>
